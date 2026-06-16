@@ -19,6 +19,7 @@ export type EchoMoodSummary = {
   id: string
   createdAt: string
   weatherScore: number
+  impactScore: number | null
   date: string
   perspective: Perspective
   weather: WeatherOption

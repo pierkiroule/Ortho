@@ -16,7 +16,7 @@ export function loadHistory(): EchoMoodEntry[] {
     const parsed = JSON.parse(raw) as EchoMoodEntry[]
     return Array.isArray(parsed)
       ? parsed
-          .map((entry) => ({ ...entry, perspective: entry.perspective ?? 'patient' }))
+          .map((entry) => ({ ...entry, perspective: entry.perspective ?? 'patient', impactScore: entry.impactScore ?? null }))
           .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       : []
   } catch {

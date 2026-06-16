@@ -7,7 +7,7 @@ export function joinFrench(items: string[]) {
   return `${items.slice(0, -1).join(', ')} et ${items.at(-1)}`
 }
 
-export function buildSynthesis(priorityCards: MoodCard[], perspective: Perspective = 'patient') {
+export function buildSynthesis(priorityCards: MoodCard[], perspective: Perspective = 'patient', impactScore: number | null = null) {
   const resources = priorityCards.filter((card) => card.group === 'resource')
   const difficulties = priorityCards.filter((card) => card.group === 'difficulty')
   const parts: string[] = []
@@ -28,11 +28,15 @@ export function buildSynthesis(priorityCards: MoodCard[], perspective: Perspecti
     )
   }
 
+  if (impactScore !== null) {
+    parts.unshift(`Impact perçu du soin ortho sur le mood : ${impactScore}/10.`)
+  }
+
   return parts.join(' ')
 }
 
-export function createSummary(selected: MoodCard[], priorities: MoodCard[], weather: WeatherOption, perspective: Perspective = 'patient'): EchoMoodSummary {
-  const synthesis = buildSynthesis(priorities, perspective)
+export function createSummary(selected: MoodCard[], priorities: MoodCard[], weather: WeatherOption, perspective: Perspective = 'patient', impactScore: number | null = null): EchoMoodSummary {
+  const synthesis = buildSynthesis(priorities, perspective, impactScore)
 
   const createdAt = new Date().toISOString()
 
@@ -42,6 +46,7 @@ export function createSummary(selected: MoodCard[], priorities: MoodCard[], weat
     date: createdAt.slice(0, 10),
     perspective,
     weatherScore: getWeatherScore(weather.id),
+    impactScore,
     weather,
     selected,
     priorities,

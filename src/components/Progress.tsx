@@ -1,10 +1,9 @@
 const steps = [
-  { icon: '🏠', label: 'Accueil' },
-  { icon: '🌦️', label: 'MétéoMood' },
+  { icon: '🌦️', label: 'Météo' },
+  { icon: '〰️', label: 'Impact' },
   { icon: '⚖️', label: 'Balance' },
+  { icon: '⭐', label: 'Priorité' },
   { icon: '📝', label: 'Synthèse' },
-  { icon: '📈', label: 'Évolution' },
-  { icon: '📤', label: 'Partager' },
 ]
 
 type Props = { step: number; total?: number }
@@ -14,7 +13,7 @@ export function Progress({ step, total = steps.length }: Props) {
   return (
     <nav className="progress-track" aria-label={`Étape ${step} sur ${total}`}>
       {visibleSteps.map((item, index) => {
-        const stepNumber = index
+        const stepNumber = index + 1
         const active = stepNumber === step
         const filled = stepNumber <= step
         return (

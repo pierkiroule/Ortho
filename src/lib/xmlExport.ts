@@ -22,6 +22,7 @@ export function createSummaryXml(entry: EchoMoodEntry) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <echomood version="1.0" type="synthese">
   <entry id="${escapeXml(entry.id)}" perspective="${escapeXml(entry.perspective ?? 'patient')}" date="${escapeXml(entry.date)}" createdAt="${escapeXml(entry.createdAt)}">
+    <impactScore>${entry.impactScore ?? ''}</impactScore>
     <weather id="${escapeXml(entry.weather.id)}" score="${entry.weatherScore}">
       <emoji>${escapeXml(entry.weather.emoji)}</emoji>
       <label>${escapeXml(entry.weather.label)}</label>
