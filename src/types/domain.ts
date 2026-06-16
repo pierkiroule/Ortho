@@ -1,9 +1,11 @@
 export type CardGroup = 'resource' | 'difficulty'
+export type Perspective = 'patient' | 'parent'
 
 export type MoodCard = {
   id: string
   emoji: string
   label: string
+  parentLabel: string
   group: CardGroup
 }
 
@@ -18,6 +20,7 @@ export type EchoMoodSummary = {
   createdAt: string
   weatherScore: number
   date: string
+  perspective: Perspective
   weather: WeatherOption
   selected: MoodCard[]
   priorities: MoodCard[]

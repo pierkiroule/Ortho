@@ -14,7 +14,11 @@ export function loadHistory(): EchoMoodEntry[] {
     const raw = window.localStorage.getItem(storageKey)
     if (!raw) return []
     const parsed = JSON.parse(raw) as EchoMoodEntry[]
-    return Array.isArray(parsed) ? parsed.sort((a, b) => a.createdAt.localeCompare(b.createdAt)) : []
+    return Array.isArray(parsed)
+      ? parsed
+          .map((entry) => ({ ...entry, perspective: entry.perspective ?? 'patient' }))
+          .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      : []
   } catch {
     return []
   }
