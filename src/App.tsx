@@ -126,8 +126,8 @@ function App() {
         <section className="screen">
           <Header back={() => goTo(0)} step={1} />
           <StepIntro
-            title={mode === 'parent' ? 'Selon vous, quel temps fait-il pour votre enfant aujourd’hui ?' : 'Si ton humeur du moment était une météo, quel émoji choisirais-tu ?'}
-            text={mode === 'parent' ? 'Choisissez l’image qui ressemble le plus à la manière dont vous pensez qu’il vit son traitement en ce moment.' : 'Choisis l’image qui ressemble le plus à ce que tu vis en ce moment.'}
+            title={mode === 'parent' ? 'Selon vous, si son humeur du moment était une météo, quel émoji choisiriez-vous ?' : 'Si ton humeur du moment était une météo, quel émoji choisirais-tu ?'}
+            text={mode === 'parent' ? 'Choisissez l’image qui ressemble le plus à ce qu’il vit en ce moment.' : 'Choisis l’image qui ressemble le plus à ce que tu vis en ce moment.'}
             mode={mode}
           />
           <div className="weather-grid weather-first">{weatherOptions.map((option) => <button key={option.id} className={`weather-btn ${weather?.id === option.id ? 'selected' : ''}`} type="button" onClick={() => setWeather(option)}><span className="weather-emoji">{option.emoji}</span><span className="weather-label">{option.label}</span><small>{mode === 'parent' ? option.parentDescription : option.description}</small></button>)}</div>
@@ -139,7 +139,7 @@ function App() {
         <section className="screen">
           <Header back={() => goTo(1)} step={2} />
           <StepIntro
-            title={mode === 'parent' ? 'Selon vous, comment votre enfant vit-il son traitement orthodontique aujourd’hui ?' : 'Aujourd’hui, comment vis-tu ton traitement orthodontique ?'}
+            title={mode === 'parent' ? 'Selon vous, aujourd’hui, comment vit-il son traitement orthodontique ?' : 'Aujourd’hui, comment vis-tu ton traitement orthodontique ?'}
             text={mode === 'parent' ? 'Choisissez l’image qui décrit le mieux son ressenti au quotidien face aux contraintes du traitement : bagues, élastiques, consignes…' : 'Choisis l’image qui décrit le mieux ton ressenti au quotidien face aux contraintes du traitement : bagues, élastiques, consignes…'}
             mode={mode}
           />
@@ -152,7 +152,7 @@ function App() {
         <section className="screen">
           <Header back={() => goTo(2)} step={3} />
           <StepIntro
-            title={mode === 'parent' ? 'Qu’est-ce qui ressemble le plus à ce que vit votre enfant actuellement ?' : 'Qu’est-ce qui ressemble le plus à ce que tu vis actuellement ?'}
+            title={mode === 'parent' ? 'Qu’est-ce qui ressemble le plus à ce qu’il vit actuellement ?' : 'Qu’est-ce qui ressemble le plus à ce que tu vis actuellement ?'}
             text={mode === 'parent' ? 'Vous pouvez choisir autant de cartes que vous le souhaitez.' : 'Tu peux choisir autant de cartes que tu veux.'}
             mode={mode}
           />
@@ -167,7 +167,7 @@ function App() {
           <Header back={() => goTo(3)} step={4} />
           <StepIntro
             title={mode === 'parent' ? 'Si vous ne pouviez garder qu’une seule carte, laquelle choisiriez-vous ?' : 'Si tu ne pouvais garder qu’une seule carte, laquelle choisirais-tu ?'}
-            text={mode === 'parent' ? 'Celle qui représente le mieux ce que votre enfant semble vivre aujourd’hui.' : 'Celle qui représente le mieux ce que tu vis aujourd’hui.'}
+            text={mode === 'parent' ? 'Celle qui représente le mieux ce qu’il vit aujourd’hui.' : 'Celle qui représente le mieux ce que tu vis aujourd’hui.'}
             mode={mode}
           />
           <div className="card-grid priority-grid">{selectedCards.map((card) => <CardButton key={card.id} card={card} selected={priorityIds.includes(card.id)} priority={priorityIds.includes(card.id)} onClick={() => chooseDailyCard(card.id)} />)}</div>
