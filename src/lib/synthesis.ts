@@ -1,4 +1,5 @@
 import { difficultyPhrase, questions, resourcePhrase } from '../data/echomood'
+import { getWeatherScore } from './history'
 import type { EchoMoodSummary, MoodCard, WeatherOption } from '../types/domain'
 
 export function joinFrench(items: string[]) {
@@ -33,8 +34,13 @@ export function buildSynthesis(priorityCards: MoodCard[]) {
 export function createSummary(selected: MoodCard[], priorities: MoodCard[], weather: WeatherOption): EchoMoodSummary {
   const synthesis = buildSynthesis(priorities)
 
+  const createdAt = new Date().toISOString()
+
   return {
-    date: new Date().toISOString().slice(0, 10),
+    id: crypto.randomUUID(),
+    createdAt,
+    date: createdAt.slice(0, 10),
+    weatherScore: getWeatherScore(weather.id),
     weather,
     selected,
     priorities,
