@@ -15,6 +15,7 @@ export function CardButton({ card, selected, priority = false, onClick }: Props)
       onClick={onClick}
       aria-pressed={selected}
     >
+      <span className="card-bubbles" aria-hidden="true"><span /><span /><span /></span>
       <span className="card-emoji" aria-hidden="true">{card.emoji}</span>
       <span className="card-label">{card.label}</span>
     </button>
