@@ -42,7 +42,7 @@ export type EchoMoodSummary = {
   priorities: MoodCard[]
   synthesis: string
   suggestedQuestion: string
-  tips: EducationalTip[]
+  tip: EducationalTip | null
 }
 
 export type EchoMoodEntry = EchoMoodSummary

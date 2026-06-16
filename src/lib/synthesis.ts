@@ -36,7 +36,7 @@ export function buildSynthesis(priorityCards: MoodCard[], perspective: Perspecti
 }
 
 
-export function selectEducationalTips(priorityCards: MoodCard[], selectedCards: MoodCard[], weather: WeatherOption, perspective: Perspective, impactScore: number | null): EducationalTip[] {
+export function selectEducationalTip(priorityCards: MoodCard[], selectedCards: MoodCard[], weather: WeatherOption, perspective: Perspective, impactScore: number | null): EducationalTip | null {
   const selectedIds = new Set([...selectedCards, ...priorityCards].map((card) => card.id))
   const selectedGroups = new Set([...selectedCards, ...priorityCards].map((card) => card.group))
 
@@ -52,13 +52,12 @@ export function selectEducationalTips(priorityCards: MoodCard[], selectedCards: 
     })
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 4)
-    .map(({ tip }) => tip)
+    .at(0)?.tip ?? null
 }
 
 export function createSummary(selected: MoodCard[], priorities: MoodCard[], weather: WeatherOption, perspective: Perspective = 'patient', impactScore: number | null = null): EchoMoodSummary {
   const synthesis = buildSynthesis(priorities, perspective, impactScore)
-  const tips = selectEducationalTips(priorities, selected, weather, perspective, impactScore)
+  const tip = selectEducationalTip(priorities, selected, weather, perspective, impactScore)
 
   const createdAt = new Date().toISOString()
 
@@ -73,7 +72,7 @@ export function createSummary(selected: MoodCard[], priorities: MoodCard[], weat
     selected,
     priorities,
     synthesis,
-    tips,
+    tip,
     suggestedQuestion:
       priorities.length > 0
         ? questions[priorities[0].id]
