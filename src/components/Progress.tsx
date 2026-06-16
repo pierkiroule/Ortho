@@ -1,7 +1,7 @@
 const steps = [
   { icon: '🏠', label: 'Accueil' },
+  { icon: '🌦️', label: 'MétéoMood' },
   { icon: '⚖️', label: 'Balance' },
-  { icon: '🌦️', label: 'Météo' },
   { icon: '📝', label: 'Synthèse' },
   { icon: '📈', label: 'Évolution' },
   { icon: '📤', label: 'Partager' },
