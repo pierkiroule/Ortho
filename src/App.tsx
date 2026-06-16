@@ -111,11 +111,11 @@ function App() {
           <div className="hero">
             <EffervescentBubbles variant="hero" />
             <div className="hero-orbit" aria-hidden="true"><span>😁</span><span>✨</span><span>🦷</span><span>💪</span></div>
-            <span className="hero-badge">✨ Ta constellation du jour</span>
-            <h1 className="hero-title" aria-label="EchoMood•°"><span className="hero-title-word">EchoMood</span><span className="hero-title-mark">•°</span><span className="hero-title-accent">Ortho</span></h1>
-            <p className="hero-tagline">l’écho de ton vécu par rapport aux soins du moment <span className="tagline-mark">•°</span></p>
-            <p className="hero-subtitle">Comment se vit ton traitement en ce moment ?</p>
-            <p className="hero-text">Une webapp locale, sans serveur, pour créer une synthèse visuelle et conserver l’évolution dans un historique privé sur cet appareil.</p>
+            <span className="hero-badge">Expression du vécu orthodontique</span>
+            <h1 className="hero-title" aria-label="EchoMood"><span className="hero-title-word">EchoMood</span></h1>
+            <p className="hero-tagline">L’écho du vécu associé aux soins orthodontiques&nbsp;!</p>
+            <p className="hero-subtitle">Prends un instant pour exprimer ton ressenti du jour.</p>
+            <p className="hero-text">EchoMood crée une synthèse visuelle claire pour mieux en parler avec ton praticien. Tes réponses restent sur cet appareil.</p>
             <button className="btn btn-primary" type="button" onClick={() => goTo(2)}>Commencer mon EchoMood</button>
             <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’historique</button>
           </div>
