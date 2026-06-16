@@ -1,4 +1,4 @@
-import type { MoodCard, WeatherOption } from '../types/domain'
+import type { EducationalTip, MoodCard, WeatherOption } from '../types/domain'
 
 export const cards: MoodCard[] = [
   { id: 'changements', emoji: '😎', label: 'Je remarque des changements positifs', parentLabel: 'Votre enfant remarque des changements positifs', group: 'resource' },
@@ -77,3 +77,18 @@ export const questions: Record<string, string> = {
   lassitude: 'Qu’est-ce qui pourrait t’aider quand tu te sens découragé ?',
   questions: 'Quelles sont les questions qui te viennent le plus souvent ?',
 }
+
+export const educationalTips: EducationalTip[] = [
+  { id: 'douleur-court', emoji: '🧊', title: 'Douleur après activation', text: 'Prévoir des aliments souples pendant 24 à 48 h et noter ce qui soulage pour en reparler au cabinet.', audience: 'both', cardIds: ['douleur'], weatherIds: ['couvert', 'pluie', 'orage'] },
+  { id: 'irritations-cire', emoji: '🩹', title: 'Irritations dans la bouche', text: 'Repérer la zone qui frotte, utiliser la cire orthodontique si elle a été conseillée, et signaler toute blessure persistante.', audience: 'both', cardIds: ['irritations'] },
+  { id: 'elastiques-rituel', emoji: '🪢', title: 'Rendre les élastiques plus automatiques', text: 'Associer les élastiques à deux routines fixes, par exemple après le brossage du matin et avant de dormir.', audience: 'patient', cardIds: ['elastiques', 'oubli'] },
+  { id: 'parents-consignes', emoji: '📌', title: 'Aider sans contrôler', text: 'Les parents peuvent proposer un rappel neutre et bref, puis laisser le jeune cocher lui-même sa routine.', audience: 'parent', cardIds: ['oubli', 'elastiques'] },
+  { id: 'regard-phrase', emoji: '💬', title: 'Préparer une phrase simple', text: 'Face aux questions des autres, préparer une réponse courte peut redonner du contrôle : “c’est mon traitement, il avance”.', audience: 'both', cardIds: ['regard'] },
+  { id: 'repas-confort', emoji: '🍽️', title: 'Adapter les repas compliqués', text: 'Lister deux repas faciles les jours sensibles et couper les aliments en petits morceaux pour limiter l’effort.', audience: 'both', cardIds: ['manger', 'douleur'] },
+  { id: 'sommeil-signal', emoji: '🌙', title: 'Sommeil à surveiller', text: 'Si l’appareil gêne plusieurs nuits de suite, noter l’heure, la gêne et l’intensité pour ajuster les conseils.', audience: 'both', cardIds: ['sommeil'] },
+  { id: 'motivation-photo', emoji: '📸', title: 'Voir les progrès', text: 'Comparer avec une photo ou un souvenir du début aide à rendre les progrès visibles quand la durée paraît longue.', audience: 'patient', cardIds: ['changements', 'fierte', 'duree', 'lassitude'] },
+  { id: 'questions-liste', emoji: '🤔', title: 'Transformer les questions en plan', text: 'Écrire les trois questions prioritaires avant le rendez-vous facilite une discussion claire avec le praticien.', audience: 'both', cardIds: ['questions'] },
+  { id: 'orage-pause', emoji: '🧘', title: 'Quand le mood est bas', text: 'Choisir une micro-action réaliste pour aujourd’hui seulement : un brossage réussi, une question posée ou une pause calme.', audience: 'both', groups: ['difficulty'], weatherIds: ['pluie', 'orage'], minImpactScore: 6 },
+  { id: 'ressource-ancrage', emoji: '🌟', title: 'Ancrer ce qui marche', text: 'Nommer précisément ce qui aide déjà permet de le répéter les jours plus difficiles.', audience: 'both', groups: ['resource'] },
+  { id: 'parent-ecoute', emoji: '👂', title: 'Ouvrir l’échange', text: 'Commencer par “qu’est-ce qui est le plus pénible aujourd’hui ?” avant de proposer une solution favorise la coopération.', audience: 'parent', groups: ['difficulty'] },
+] satisfies EducationalTip[]
