@@ -13,6 +13,16 @@ export type WeatherOption = {
   id: string
   emoji: string
   label: string
+  description: string
+  parentDescription: string
+}
+
+export type TreatmentOption = {
+  id: string
+  emoji: string
+  label: string
+  description: string
+  parentDescription: string
 }
 
 export type TipAudience = 'patient' | 'parent' | 'both'
@@ -35,6 +45,7 @@ export type EchoMoodSummary = {
   createdAt: string
   weatherScore: number
   impactScore: number | null
+  treatmentWeight: TreatmentOption | null
   date: string
   perspective: Perspective
   weather: WeatherOption

@@ -22,11 +22,14 @@ export function createSummaryXml(entry: EchoMoodEntry) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <echomood version="1.0" type="synthese">
   <entry id="${escapeXml(entry.id)}" perspective="${escapeXml(entry.perspective ?? 'patient')}" date="${escapeXml(entry.date)}" createdAt="${escapeXml(entry.createdAt)}">
-    <impactScore>${entry.impactScore ?? ''}</impactScore>
     <weather id="${escapeXml(entry.weather.id)}" score="${entry.weatherScore}">
       <emoji>${escapeXml(entry.weather.emoji)}</emoji>
       <label>${escapeXml(entry.weather.label)}</label>
     </weather>
+    <treatmentWeight id="${entry.treatmentWeight ? escapeXml(entry.treatmentWeight.id) : ''}">
+      <emoji>${entry.treatmentWeight ? escapeXml(entry.treatmentWeight.emoji) : ''}</emoji>
+      <label>${entry.treatmentWeight ? escapeXml(entry.treatmentWeight.label) : ''}</label>
+    </treatmentWeight>
     <selected>
 ${cardXml('card', entry.selected)}
     </selected>
@@ -34,7 +37,6 @@ ${cardXml('card', entry.selected)}
 ${cardXml('priority', entry.priorities)}
     </priorities>
     <synthesis>${escapeXml(entry.synthesis)}</synthesis>
-    <tip>${entry.tip ? `<item id="${escapeXml(entry.tip.id)}" audience="${escapeXml(entry.tip.audience)}"><emoji>${escapeXml(entry.tip.emoji)}</emoji><title>${escapeXml(entry.tip.title)}</title><text>${escapeXml(entry.tip.text)}</text></item>` : ''}</tip>
     <suggestedQuestion>${escapeXml(entry.suggestedQuestion)}</suggestedQuestion>
   </entry>
 </echomood>`
