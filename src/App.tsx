@@ -33,8 +33,9 @@ function App() {
   useEffect(() => setHistory(loadHistory()), [])
 
   const draft = drafts[mode]
-  const selectedCards = useMemo(() => cards.filter((card) => draft.selectedIds.includes(card.id)), [draft.selectedIds])
-  const priorityCards = useMemo(() => cards.filter((card) => draft.priorityIds.includes(card.id)), [draft.priorityIds])
+  const cardsForMode = useMemo(() => cards.map((card) => ({ ...card, label: mode === 'parent' ? card.parentLabel : card.label })), [mode])
+  const selectedCards = useMemo(() => cardsForMode.filter((card) => draft.selectedIds.includes(card.id)), [cardsForMode, draft.selectedIds])
+  const priorityCards = useMemo(() => cardsForMode.filter((card) => draft.priorityIds.includes(card.id)), [cardsForMode, draft.priorityIds])
   const summary = savedEntry ?? (draft.weather ? createSummary(selectedCards, priorityCards, draft.weather, mode, draft.impactScore) : null)
   const selectedIds = draft.selectedIds
   const priorityIds = draft.priorityIds
@@ -117,7 +118,11 @@ function App() {
       {screen === 1 && (
         <section className="screen">
           <Header back={() => goTo(0)} step={1} />
-          <StepIntro title="Quelle est la météo du traitement aujourd’hui ?" text="Cette météo aide à contextualiser les astuces éducatives et la discussion avec le praticien." mode={mode} />
+          <StepIntro
+            title={mode === 'parent' ? 'Pour vous parents, comment votre enfant vit-il le soin en ce moment ?' : 'Quelle est la météo du traitement aujourd’hui ?'}
+            text={mode === 'parent' ? 'Votre regard complète celui du jeune sans modifier les items de comparaison.' : 'Cette météo aide à contextualiser les astuces éducatives et la discussion avec le praticien.'}
+            mode={mode}
+          />
           <div className="weather-grid weather-first">{weatherOptions.map((option) => <button key={option.id} className={`weather-btn ${weather?.id === option.id ? 'selected' : ''}`} type="button" onClick={() => setWeather(option)}><span className="weather-emoji">{option.emoji}</span><span className="weather-label">{option.label}</span></button>)}</div>
           <button className="btn btn-primary btn-sticky" type="button" disabled={!weather} onClick={() => goTo(2)}>Continuer</button>
         </section>
@@ -126,7 +131,11 @@ function App() {
       {screen === 2 && (
         <section className="screen">
           <Header back={() => goTo(1)} step={2} />
-          <StepIntro title="Quel impact sur le mood ?" text="Le curseur permet de repérer si le vécu orthodontique prend peu ou beaucoup de place aujourd’hui." mode={mode} />
+          <StepIntro
+            title={mode === 'parent' ? 'Selon vous, quel impact le soin a-t-il sur son mood ?' : 'Quel impact sur le mood ?'}
+            text={mode === 'parent' ? 'Placez le curseur selon ce que vous observez chez votre enfant aujourd’hui.' : 'Le curseur permet de repérer si le vécu orthodontique prend peu ou beaucoup de place aujourd’hui.'}
+            mode={mode}
+          />
           <ImpactSlider value={draft.impactScore} onChange={(impactScore) => updateDraft({ impactScore })} />
           <button className="btn btn-primary btn-sticky" type="button" disabled={draft.impactScore === null} onClick={() => goTo(3)}>Continuer</button>
         </section>
@@ -135,9 +144,13 @@ function App() {
       {screen === 3 && (
         <section className="screen">
           <Header back={() => goTo(2)} step={3} />
-          <StepIntro title="Choisis ce qui correspond à ton vécu aujourd’hui." text="Les cartes sélectionnées personnaliseront la synthèse et la rubrique Astuces." mode={mode} />
-          <CardGroup title="🌟 Ce qui te soutient" group="resource" mode={mode} selectedIds={selectedIds} onToggle={toggleSelected} />
-          <CardGroup title="🌧️ Ce qui pèse un peu" group="difficulty" mode={mode} selectedIds={selectedIds} onToggle={toggleSelected} />
+          <StepIntro
+            title={mode === 'parent' ? 'Pour vous parents, votre enfant vit comment le soin en ce moment ?' : 'Choisis ce qui correspond à ton vécu aujourd’hui.'}
+            text={mode === 'parent' ? 'Sélectionnez ce que vous percevez chez votre enfant. Les mêmes items sont conservés pour comparer les regards patient/parents.' : 'Les cartes sélectionnées personnaliseront la synthèse et la rubrique Astuces.'}
+            mode={mode}
+          />
+          <CardGroup title={mode === 'parent' ? '🌟 Ce qui soutient votre enfant' : '🌟 Ce qui te soutient'} group="resource" mode={mode} selectedIds={selectedIds} onToggle={toggleSelected} />
+          <CardGroup title={mode === 'parent' ? '🌧️ Ce qui pèse pour votre enfant' : '🌧️ Ce qui pèse un peu'} group="difficulty" mode={mode} selectedIds={selectedIds} onToggle={toggleSelected} />
           <button className="btn btn-primary btn-sticky" type="button" disabled={selectedIds.length === 0} onClick={() => goTo(4)}>Continuer</button>
         </section>
       )}
@@ -145,7 +158,7 @@ function App() {
       {screen === 4 && (
         <section className="screen">
           <Header back={() => goTo(3)} step={4} />
-          <h2 className="screen-title">Parmi tes cartes, choisis les 3 plus importantes aujourd’hui.</h2>
+          <h2 className="screen-title">{mode === 'parent' ? 'Parmi vos cartes, choisissez les 3 points les plus importants pour votre enfant aujourd’hui.' : 'Parmi tes cartes, choisis les 3 plus importantes aujourd’hui.'}</h2>
           <p className="priority-counter">{priorityIds.length} / 3 priorités choisies</p>
           <div className="card-grid priority-grid">{selectedCards.map((card) => <CardButton key={card.id} card={card} selected={priorityIds.includes(card.id)} priority={priorityIds.includes(card.id)} onClick={() => togglePriority(card.id)} />)}</div>
           <button className="btn btn-primary btn-sticky" type="button" disabled={priorityIds.length === 0} onClick={showSummary}>Générer la synthèse éducative</button>
