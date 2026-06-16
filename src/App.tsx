@@ -139,8 +139,8 @@ function App() {
         <section className="screen">
           <Header back={() => goTo(1)} step={2} />
           <StepIntro
-            title={mode === 'parent' ? 'Selon vous, aujourd’hui, son traitement ressemble plutôt à...' : 'Aujourd’hui, ton traitement ressemble plutôt à...'}
-            text={mode === 'parent' ? 'Choisissez l’image qui ressemble le plus à ce que votre enfant semble vivre.' : 'Choisis l’image qui te ressemble le plus.'}
+            title={mode === 'parent' ? 'Selon vous, comment votre enfant vit-il son traitement orthodontique aujourd’hui ?' : 'Aujourd’hui, comment vis-tu ton traitement orthodontique ?'}
+            text={mode === 'parent' ? 'Choisissez l’image qui décrit le mieux son ressenti au quotidien face aux contraintes du traitement : bagues, élastiques, consignes…' : 'Choisis l’image qui décrit le mieux ton ressenti au quotidien face aux contraintes du traitement : bagues, élastiques, consignes…'}
             mode={mode}
           />
           <div className="weather-grid treatment-grid">{treatmentOptions.map((option) => <button key={option.id} className={`weather-btn ${draft.treatmentWeight?.id === option.id ? 'selected' : ''}`} type="button" onClick={() => setTreatmentWeight(option)}><span className="weather-emoji">{option.emoji}</span><span className="weather-label">{option.label}</span><small>{mode === 'parent' ? option.parentDescription : option.description}</small></button>)}</div>
