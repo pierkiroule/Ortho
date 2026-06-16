@@ -14,6 +14,9 @@ export type WeatherOption = {
 }
 
 export type EchoMoodSummary = {
+  id: string
+  createdAt: string
+  weatherScore: number
   date: string
   weather: WeatherOption
   selected: MoodCard[]
@@ -21,3 +24,5 @@ export type EchoMoodSummary = {
   synthesis: string
   suggestedQuestion: string
 }
+
+export type EchoMoodEntry = EchoMoodSummary
