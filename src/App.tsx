@@ -104,13 +104,13 @@ function App() {
   }
 
   return (
-    <main className="app">
+    <main className={`app screen-${screen}`}>
       {screen === 1 && (
         <section className="screen home-screen">
           <div className="hero">
             <div className="hero-orbit" aria-hidden="true"><span>😁</span><span>✨</span><span>🦷</span><span>💪</span></div>
             <span className="hero-badge">✨ Ta constellation du jour</span>
-            <h1 className="hero-title">EchoMood<span className="hero-title-accent">Ortho</span></h1>
+            <h1 className="hero-title" aria-label="EchoMood•°"><span className="hero-title-word">EchoMood</span><span className="hero-title-mark">•°</span><span className="hero-title-accent">Ortho</span></h1>
             <p className="hero-tagline">l’écho de ton vécu par rapport aux soins du moment <span className="tagline-mark">•°</span></p>
             <p className="hero-subtitle">Comment se vit ton traitement en ce moment ?</p>
             <p className="hero-text">Une webapp locale, sans serveur, pour créer une synthèse visuelle et conserver l’évolution dans un historique privé sur cet appareil.</p>
@@ -186,8 +186,15 @@ function CardGroup({ title, group, selectedIds, onToggle }: { title: string; gro
   return <section className="card-group"><h3 className="card-group-title">{title}</h3><div className="card-grid">{cards.filter((card) => card.group === group).map((card) => <CardButton key={card.id} card={card} selected={selectedIds.includes(card.id)} onClick={() => onToggle(card.id)} />)}</div></section>
 }
 
+function getEchoMoji(priorities: typeof cards) {
+  const resources = priorities.filter((card) => card.group === 'resource').length
+  return resources >= priorities.length - resources ? '😁' : '🦷'
+}
+
 function SummaryCard({ refEl, entry, selectedCards, priorityCards }: { refEl: RefObject<HTMLDivElement | null>; entry: EchoMoodEntry; selectedCards: typeof cards; priorityCards: typeof cards }) {
-  return <div ref={refEl} className="result-capture"><h2 className="result-title">Mon EchoMood Ortho</h2><p className="result-date">{new Date(`${entry.date}T00:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p><div className="weather-display"><span className="we">{entry.weather.emoji}</span><span>{entry.weather.label}</span></div><div className="constellation-wrap"><Constellation selected={selectedCards} priorities={priorityCards} /></div><ResultSection title="🌟 Ressources" cards={selectedCards.filter((card) => card.group === 'resource')} /><ResultSection title="🌧️ Difficultés" cards={selectedCards.filter((card) => card.group === 'difficulty')} /><ResultSection title="🎯 Priorités du jour" cards={priorityCards} priority /><article className="result-section synthesis-box"><h3>📝 Synthèse pour le praticien</h3><p>{entry.synthesis}</p></article><article className="result-section question-box"><h3>💬 Question d’ouverture suggérée</h3><p>{entry.suggestedQuestion}</p></article></div>
+  const echoMoji = getEchoMoji(priorityCards)
+
+  return <div ref={refEl} className="result-capture result-reveal"><div className="reveal-stage" aria-label={`Révélation de l'EchoMoji ${echoMoji}`}><div className="reveal-halo" /><span className="reveal-emoji">{echoMoji}</span><span className="spark spark-one">✦</span><span className="spark spark-two">•°</span><span className="spark spark-three">✧</span><span className="spark spark-four">✺</span></div><h2 className="result-title">Mon EchoMood Ortho</h2><p className="result-date">{new Date(`${entry.date}T00:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p><div className="weather-display"><span className="we">{entry.weather.emoji}</span><span>{entry.weather.label}</span></div><div className="constellation-wrap"><Constellation selected={selectedCards} priorities={priorityCards} /></div><ResultSection title="🌟 Ressources" cards={selectedCards.filter((card) => card.group === 'resource')} /><ResultSection title="🌧️ Difficultés" cards={selectedCards.filter((card) => card.group === 'difficulty')} /><ResultSection title="🎯 Priorités du jour" cards={priorityCards} priority /><article className="result-section synthesis-box"><h3>📝 Synthèse pour le praticien</h3><p>{entry.synthesis}</p></article><article className="result-section question-box"><h3>💬 Question d’ouverture suggérée</h3><p>{entry.suggestedQuestion}</p></article></div>
 }
 
 function HistoryDashboard({ refEl, entries }: { refEl: RefObject<HTMLDivElement | null>; entries: EchoMoodEntry[] }) {
