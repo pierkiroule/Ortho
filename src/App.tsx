@@ -7,7 +7,7 @@ import { Progress } from './components/Progress'
 import { cards, treatmentOptions, weatherOptions } from './data/echomood'
 import { loadHistory, upsertEntry } from './lib/history'
 import { createSummary } from './lib/synthesis'
-import { createHistoryXml, createSummaryXml } from './lib/xmlExport'
+import { createHistoryXml } from './lib/xmlExport'
 import type { EchoMoodEntry, Perspective, TreatmentOption, WeatherOption } from './types/domain'
 import './styles/app.css'
 
@@ -77,10 +77,21 @@ function App() {
     goTo(5)
   }
 
-  async function copySynthesis() {
+  function shareSynthesisByEmail() {
     if (!summary) return
-    await navigator.clipboard.writeText(`${summary.synthesis}\n\nQuestion d’ouverture : ${summary.suggestedQuestion}`)
-    notify('Synthèse copiée !')
+    const subject = 'Synthèse EchoMood pour mon orthodontiste'
+    const body = [
+      'Bonjour,',
+      '',
+      'Voici ma synthèse EchoMood à partager avec mon orthodontiste :',
+      '',
+      summary.synthesis,
+      '',
+      `Question d’ouverture : ${summary.suggestedQuestion}`,
+      '',
+      `Date : ${new Date(summary.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}`,
+    ].join('\n')
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   async function downloadPng(target: HTMLDivElement | null, filename: string) {
@@ -169,14 +180,12 @@ function App() {
           <SummaryCard refEl={resultRef} entry={summary} selectedCards={selectedCards} priorityCards={priorityCards} />
           <ShareView reportRef={reportRef} entries={history} patient={latestPatient} parent={latestParent} />
           <div className="result-actions">
-            <button className="btn btn-secondary" type="button" onClick={copySynthesis}>📋 Copier la synthèse</button>
-            <button className="btn btn-secondary" type="button" onClick={() => downloadPng(resultRef.current, 'echomood-synthese.png')}>🖼️ Partager en PNG</button>
-            <button className="btn btn-secondary" type="button" onClick={() => downloadXml(createSummaryXml(summary), 'echomood-synthese.xml')}>🧾 Partager en XML</button>
+            <button className="btn btn-secondary" type="button" onClick={shareSynthesisByEmail}>✉️ Partager cette synthèse pour mon orthodontiste</button>
+            <button className="btn btn-secondary" type="button" onClick={printPdfReport}>🖨️ Imprimer cette synthèse pour mon orthodontiste</button>
             <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’évolution</button>
             {summary.perspective === 'patient' && (
               <div className="parent-invite-panel"><p>Tu peux proposer à tes parents de remplir leur EchoMood du moment : cela permettra de comparer si vous percevez la même chose ou pas, tout en gardant le contrôle de ton espace.</p><button className="btn btn-parent-invite" type="button" onClick={inviteParentsEchoMood}>👪 Proposer à mes parents de remplir leur EchoMood</button></div>
             )}
-            <button className="btn btn-secondary" type="button" onClick={printPdfReport}>🖨️ Rapport PDF</button>
             <button className="btn btn-ghost" type="button" onClick={reset}>🔄 Recommencer</button>
           </div>
         </section>
