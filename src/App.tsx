@@ -126,7 +126,7 @@ function App() {
         <section className="screen">
           <Header back={() => goTo(0)} step={1} />
           <StepIntro
-            title={mode === 'parent' ? 'Selon vous, quel temps fait-il pour votre enfant aujourd’hui ?' : 'Quel temps fait-il pour toi aujourd’hui ?'}
+            title={mode === 'parent' ? 'Selon vous, quel temps fait-il pour votre enfant aujourd’hui ?' : 'Si ton humeur du moment était une météo, quel émoji choisirais-tu ?'}
             text={mode === 'parent' ? 'Choisissez l’image qui ressemble le plus à la manière dont vous pensez qu’il vit son traitement en ce moment.' : 'Choisis l’image qui ressemble le plus à ce que tu vis en ce moment.'}
             mode={mode}
           />
