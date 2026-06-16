@@ -107,13 +107,75 @@ function App() {
   return (
     <main className={`app screen-${screen}`} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <EffervescentBubbles variant="ambient" />
-      {screen > 0 && <Header back={() => goTo(Math.max(0, screen - 1) as Screen)} step={screen} />}
-      {screen === 0 && <Home mode={mode} onStart={switchMode} onHistory={() => goTo(4)} />}
-      {screen === 1 && <section className="screen"><StepIntro title="Météo" text={mode === 'patient' ? 'Quelle est la météo de ton humeur globale aujourd’hui ?' : 'Quelle est, selon vous, la météo de l’humeur globale de votre enfant aujourd’hui ?'} mode={mode} /><div className="weather-grid weather-first">{weatherOptions.map((option) => <button key={option.id} className={`weather-btn ${draft.weather?.id === option.id ? 'selected' : ''}`} type="button" onClick={() => updateDraft({ weather: option })}><span className="weather-emoji">{option.emoji}</span><span className="weather-label">{option.label}</span></button>)}</div><button className="btn btn-primary btn-sticky" type="button" disabled={!draft.weather} onClick={() => goTo(2)}>Continuer</button></section>}
-      {screen === 2 && <section className="screen"><StepIntro title="Impact" text={mode === 'patient' ? 'Quel impact le soin ortho a-t-il sur ton mood aujourd’hui ?' : 'Quel impact le soin ortho semble-t-il avoir sur le mood de votre enfant aujourd’hui ?'} mode={mode} /><ImpactSlider value={draft.impactScore} onChange={(impactScore) => updateDraft({ impactScore })} /><button className="btn btn-primary btn-sticky" type="button" disabled={draft.impactScore === null} onClick={() => goTo(3)}>Continuer</button></section>}
-      {screen === 3 && <section className="screen"><StepIntro title="Balance" text={mode === 'patient' ? 'Choisis ce qui t’aide à avancer et ce qui freine ton traitement.' : 'Choisissez ce qui aide votre enfant et ce qui semble freiner son traitement.'} mode={mode} /><CardGroup title="🌟 Moteurs" group="resource" mode={mode} selectedIds={draft.selectedIds} onToggle={toggleSelected} /><CardGroup title="🌧️ Freins" group="difficulty" mode={mode} selectedIds={draft.selectedIds} onToggle={toggleSelected} /><button className="btn btn-primary btn-sticky" type="button" disabled={draft.selectedIds.length === 0} onClick={() => goTo(4)}>Continuer</button></section>}
-      {screen === 4 && <section className="screen"><StepIntro title="Priorité" text="Parmi les cartes retenues, marque jusqu’à 3 priorités à discuter." mode={mode} /><p className="priority-counter">{draft.priorityIds.length} / 3 priorités choisies</p><div className="card-grid priority-grid">{selectedCards.map((card) => <CardButton key={card.id} card={{ ...card, label: mode === 'parent' ? card.parentLabel : card.label }} selected={draft.priorityIds.includes(card.id)} priority={draft.priorityIds.includes(card.id)} onClick={() => togglePriority(card.id)} />)}</div><button className="btn btn-primary btn-sticky" type="button" disabled={draft.priorityIds.length === 0} onClick={showSummary}>Générer la synthèse</button></section>}
-      {screen === 5 && <section className="screen"><>{summary && <SummaryCard refEl={resultRef} entry={summary} selectedCards={selectedCards} priorityCards={priorityCards} />}<HistoryDashboard refEl={historyRef} entries={history} patient={latestPatient} parent={latestParent} /><ShareView reportRef={reportRef} entries={history} patient={latestPatient} parent={latestParent} /></><div className="result-actions no-print"><button className="btn btn-secondary" type="button" onClick={() => switchMode(mode === 'patient' ? 'parent' : 'patient')}>Compléter le parcours {mode === 'patient' ? 'parents' : 'patient'}</button><button className="btn btn-primary" type="button" disabled={history.length === 0} onClick={printPdfReport}>📄 Rapport PDF horodaté</button><button className="btn btn-secondary" type="button" disabled={!summary} onClick={copySynthesis}>📋 Copier la synthèse active</button><button className="btn btn-secondary" type="button" disabled={!summary} onClick={() => summary && downloadXml(createSummaryXml(summary), 'echomood-synthese.xml')}>🧾 XML synthèse</button><button className="btn btn-secondary" type="button" disabled={history.length === 0} onClick={() => downloadXml(createHistoryXml(history), 'echomood-evolution.xml')}>🧾 XML évolution</button><button className="btn btn-secondary" type="button" disabled={history.length === 0} onClick={() => downloadPng(reportRef.current, 'echomood-rapport.png')}>🖼️ PNG rapport</button><button className="btn btn-ghost" type="button" onClick={reset}>🔄 Revenir à l’accueil</button></div></section>}
+      {screen === 1 && (
+        <section className="screen home-screen">
+          <div className="hero">
+            <EffervescentBubbles variant="hero" />
+            <div className="hero-orbit" aria-hidden="true"><span>😁</span><span>✨</span><span>🦷</span><span>💪</span></div>
+            <span className="hero-badge">Expression du vécu orthodontique</span>
+            <h1 className="hero-title" aria-label="EchoMood"><span className="hero-title-word">EchoMood</span></h1>
+            <p className="hero-tagline">L’écho du vécu associé aux soins orthodontiques&nbsp;!</p>
+            <p className="hero-subtitle">Prends un instant pour exprimer ton ressenti du jour.</p>
+            <p className="hero-text">EchoMood crée une synthèse visuelle claire pour mieux en parler avec ton praticien. Tes réponses restent sur cet appareil.</p>
+            <button className="btn btn-primary" type="button" onClick={() => goTo(2)}>Commencer mon EchoMood</button>
+            <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’historique</button>
+          </div>
+        </section>
+      )}
+
+      {screen === 2 && (
+        <section className="screen">
+          <Header back={() => goTo(1)} step={1} />
+          <h2 className="screen-title">Choisis ce qui correspond à ton vécu aujourd’hui.</h2>
+          <CardGroup title="🌟 Ce qui te soutient" group="resource" selectedIds={selectedIds} onToggle={toggleSelected} />
+          <CardGroup title="🌧️ Ce qui pèse un peu" group="difficulty" selectedIds={selectedIds} onToggle={toggleSelected} />
+          <button className="btn btn-primary btn-sticky" type="button" disabled={selectedIds.length === 0} onClick={() => goTo(3)}>Continuer</button>
+        </section>
+      )}
+
+      {screen === 3 && (
+        <section className="screen">
+          <Header back={() => goTo(2)} step={2} />
+          <h2 className="screen-title">Parmi tes cartes, choisis les 3 plus importantes aujourd’hui.</h2>
+          <p className="priority-counter">{priorityIds.length} / 3 priorités choisies</p>
+          <div className="card-grid">{selectedCards.map((card) => <CardButton key={card.id} card={card} selected={priorityIds.includes(card.id)} priority={priorityIds.includes(card.id)} onClick={() => togglePriority(card.id)} />)}</div>
+          <button className="btn btn-primary btn-sticky" type="button" disabled={priorityIds.length === 0} onClick={() => goTo(4)}>Créer mon EchoMood</button>
+        </section>
+      )}
+
+      {screen === 4 && (
+        <section className="screen">
+          <Header back={() => goTo(3)} step={3} />
+          <h2 className="screen-title">Quelle est la météo de ton traitement aujourd’hui ?</h2>
+          <div className="weather-grid">{weatherOptions.map((option) => <button key={option.id} className={`weather-btn ${weather?.id === option.id ? 'selected' : ''}`} type="button" onClick={() => setWeather(option)}><span className="weather-emoji">{option.emoji}</span><span className="weather-label">{option.label}</span></button>)}</div>
+          <button className="btn btn-primary btn-sticky" type="button" disabled={!weather} onClick={showSummary}>Générer la synthèse</button>
+        </section>
+      )}
+
+      {screen === 5 && summary && (
+        <section className="screen">
+          <SummaryCard refEl={resultRef} entry={summary} selectedCards={selectedCards} priorityCards={priorityCards} />
+          <div className="result-actions">
+            <button className="btn btn-secondary" type="button" onClick={copySynthesis}>📋 Copier la synthèse</button>
+            <button className="btn btn-secondary" type="button" onClick={() => downloadPng(resultRef.current, 'echomood-synthese.png')}>🖼️ Partager en PNG</button>
+            <button className="btn btn-secondary" type="button" onClick={() => downloadXml(createSummaryXml(summary), 'echomood-synthese.xml')}>🧾 Partager en XML</button>
+            <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’évolution</button>
+            <button className="btn btn-ghost" type="button" onClick={reset}>🔄 Recommencer</button>
+          </div>
+        </section>
+      )}
+
+      {screen === 6 && (
+        <section className="screen">
+          <div className="screen-header"><button className="btn-back" type="button" onClick={() => goTo(1)} aria-label="Retour">←</button><h2 className="screen-title no-margin">Historique EchoMood</h2></div>
+          <HistoryDashboard refEl={historyRef} entries={history} />
+          <div className="result-actions">
+            <button className="btn btn-secondary" type="button" disabled={history.length === 0} onClick={() => downloadPng(historyRef.current, 'echomood-evolution.png')}>🖼️ Partager l’évolution en PNG</button>
+            <button className="btn btn-secondary" type="button" disabled={history.length === 0} onClick={() => downloadXml(createHistoryXml(history), 'echomood-evolution.xml')}>🧾 Partager l’évolution en XML</button>
+            <button className="btn btn-primary" type="button" onClick={() => goTo(2)}>Nouvel EchoMood</button>
+          </div>
+        </section>
+      )}
       <div className={`toast ${toast ? 'show' : ''}`}>{toast}</div>
     </main>
   )
