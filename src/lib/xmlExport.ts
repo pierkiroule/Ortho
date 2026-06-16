@@ -34,6 +34,9 @@ ${cardXml('card', entry.selected)}
 ${cardXml('priority', entry.priorities)}
     </priorities>
     <synthesis>${escapeXml(entry.synthesis)}</synthesis>
+    <tips>
+${(entry.tips ?? []).map((tip) => `      <tip id="${escapeXml(tip.id)}" audience="${escapeXml(tip.audience)}"><emoji>${escapeXml(tip.emoji)}</emoji><title>${escapeXml(tip.title)}</title><text>${escapeXml(tip.text)}</text></tip>`).join('\n')}
+    </tips>
     <suggestedQuestion>${escapeXml(entry.suggestedQuestion)}</suggestedQuestion>
   </entry>
 </echomood>`

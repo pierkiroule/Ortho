@@ -15,6 +15,21 @@ export type WeatherOption = {
   label: string
 }
 
+export type TipAudience = 'patient' | 'parent' | 'both'
+
+export type EducationalTip = {
+  id: string
+  emoji: string
+  title: string
+  text: string
+  audience: TipAudience
+  cardIds?: string[]
+  groups?: CardGroup[]
+  weatherIds?: string[]
+  minImpactScore?: number
+  maxImpactScore?: number
+}
+
 export type EchoMoodSummary = {
   id: string
   createdAt: string
@@ -27,6 +42,7 @@ export type EchoMoodSummary = {
   priorities: MoodCard[]
   synthesis: string
   suggestedQuestion: string
+  tips: EducationalTip[]
 }
 
 export type EchoMoodEntry = EchoMoodSummary
