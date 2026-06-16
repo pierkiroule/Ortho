@@ -1,8 +1,8 @@
 const steps = [
   { icon: '🌦️', label: 'Météo' },
-  { icon: '〰️', label: 'Impact' },
-  { icon: '⚖️', label: 'Balance' },
-  { icon: '⭐', label: 'Priorité' },
+  { icon: '🎈', label: 'Place' },
+  { icon: '⚖️', label: 'Cartes' },
+  { icon: '⭐', label: 'Carte du jour' },
   { icon: '📝', label: 'Synthèse' },
 ]
 
