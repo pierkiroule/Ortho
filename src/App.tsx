@@ -7,7 +7,7 @@ import { Progress } from './components/Progress'
 import { cards, treatmentOptions, weatherOptions } from './data/echomood'
 import { loadHistory, upsertEntry } from './lib/history'
 import { createSummary } from './lib/synthesis'
-import { createHistoryXml, createSummaryXml } from './lib/xmlExport'
+import { createHistoryXml } from './lib/xmlExport'
 import type { EchoMoodEntry, Perspective, TreatmentOption, WeatherOption } from './types/domain'
 import './styles/app.css'
 
@@ -77,10 +77,21 @@ function App() {
     goTo(5)
   }
 
-  async function copySynthesis() {
+  function shareSynthesisByEmail() {
     if (!summary) return
-    await navigator.clipboard.writeText(`${summary.synthesis}\n\nQuestion d’ouverture : ${summary.suggestedQuestion}`)
-    notify('Synthèse copiée !')
+    const subject = 'Synthèse EchoMood pour mon orthodontiste'
+    const body = [
+      'Bonjour,',
+      '',
+      'Voici ma synthèse EchoMood à partager avec mon orthodontiste :',
+      '',
+      summary.synthesis,
+      '',
+      `Question d’ouverture : ${summary.suggestedQuestion}`,
+      '',
+      `Date : ${new Date(summary.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}`,
+    ].join('\n')
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   async function downloadPng(target: HTMLDivElement | null, filename: string) {
@@ -169,14 +180,12 @@ function App() {
           <SummaryCard refEl={resultRef} entry={summary} selectedCards={selectedCards} priorityCards={priorityCards} />
           <ShareView reportRef={reportRef} entries={history} patient={latestPatient} parent={latestParent} />
           <div className="result-actions">
-            <button className="btn btn-secondary" type="button" onClick={copySynthesis}>📋 Copier la synthèse</button>
-            <button className="btn btn-secondary" type="button" onClick={() => downloadPng(resultRef.current, 'echomood-synthese.png')}>🖼️ Partager en PNG</button>
-            <button className="btn btn-secondary" type="button" onClick={() => downloadXml(createSummaryXml(summary), 'echomood-synthese.xml')}>🧾 Partager en XML</button>
+            <button className="btn btn-secondary" type="button" onClick={shareSynthesisByEmail}>✉️ Partager cette synthèse pour mon orthodontiste</button>
+            <button className="btn btn-secondary" type="button" onClick={printPdfReport}>🖨️ Imprimer cette synthèse pour mon orthodontiste</button>
             <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’évolution</button>
             {summary.perspective === 'patient' && (
               <div className="parent-invite-panel"><p>Tu peux proposer à tes parents de remplir leur EchoMood du moment : cela permettra de comparer si vous percevez la même chose ou pas, tout en gardant le contrôle de ton espace.</p><button className="btn btn-parent-invite" type="button" onClick={inviteParentsEchoMood}>👪 Proposer à mes parents de remplir leur EchoMood</button></div>
             )}
-            <button className="btn btn-secondary" type="button" onClick={printPdfReport}>🖨️ Rapport PDF</button>
             <button className="btn btn-ghost" type="button" onClick={reset}>🔄 Recommencer</button>
           </div>
         </section>
@@ -201,7 +210,7 @@ function App() {
 function Header({ back, step }: { back: () => void; step: number }) { return <div className="screen-header no-print"><button className="btn-back" type="button" onClick={back} aria-label="Retour">←</button><Progress step={step} /></div> }
 function StepIntro({ title, text, mode }: { title: string; text: string; mode: Perspective }) { return <div className="step-card"><span className="mode-pill">Mode {modeLabel[mode]}</span><h2 className="screen-title no-margin">{title}</h2><p>{text}</p></div> }
 
-function Home({ onStart, onHistory }: { onStart: () => void; onHistory: () => void }) { return <section className="screen home-screen"><div className="hero"><EffervescentBubbles variant="hero" /><span className="hero-badge">Swipe horizontal • parcours en 5 étapes</span><h1 className="hero-title" aria-label="EchoMood Ortho"><span className="hero-title-word">EchoMood</span><span className="hero-title-mark">•°</span><span className="hero-title-accent">Ortho</span></h1><p className="hero-subtitle">Comment se vit ton traitement aujourd’hui ?</p><p className="hero-text">Un parcours simple en 5 étapes pour créer une carte claire à partager ou capturer pendant la consultation.</p><div className="journey-map"><Progress step={0} /></div><button className="btn btn-primary" type="button" onClick={onStart}>🧑 Commencer mon EchoMood</button><button className="btn btn-secondary" type="button" onClick={onHistory}>📈 Voir synthèse & évolution</button></div></section> }
+function Home({ onStart, onHistory }: { onStart: () => void; onHistory: () => void }) { return <section className="screen home-screen"><div className="hero hero-simple"><EffervescentBubbles variant="hero" /><h1 className="hero-title" aria-label="EchoMood. Comment vis-tu le soin orthodontique actuellement ?"><span className="hero-title-word">EchoMood</span><span className="hero-title-question">Comment vis-tu le soin orthodontique actuellement&nbsp;?</span></h1><button className="btn btn-primary" type="button" onClick={onStart}>🧑 Commencer mon EchoMood</button><button className="btn btn-secondary" type="button" onClick={onHistory}>📈 Voir synthèse & évolution</button></div></section> }
 
 function EffervescentBubbles({ variant }: { variant: 'ambient' | 'hero' | 'reveal' }) { return <div className={`bubble-field bubble-field-${variant}`} aria-hidden="true">{Array.from({ length: 12 }, (_, index) => <span key={index} className={`bubble bubble-${index + 1}`} />)}</div> }
 function CardGroup({ title, group, mode, selectedIds, onToggle }: { title: string; group: 'resource' | 'difficulty'; mode: Perspective; selectedIds: string[]; onToggle: (id: string) => void }) { return <section className="card-group"><h3 className="card-group-title">{title}</h3><div className="card-grid">{cards.filter((card) => card.group === group).map((card) => <CardButton key={card.id} card={{ ...card, label: mode === 'parent' ? card.parentLabel : card.label }} selected={selectedIds.includes(card.id)} onClick={() => onToggle(card.id)} />)}</div></section> }
