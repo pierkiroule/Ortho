@@ -5,8 +5,7 @@ import type { EchoMood } from '../types/domain'
 const weights = { balloon: 270, bag: 180, suitcase: 0, rock: 90 } as const
 const resources = { r1: 270, r2: 315, r3: 0, r4: 45, r5: 90, r6: 135, r7: 180, r8: 225 } as const
 const difficulties = { d1: 292.5, d2: 337.5, d3: 22.5, d4: 67.5, d5: 112.5, d6: 157.5, d7: 202.5, d8: 247.5 } as const
-const focusAngles = { ...resources, ...difficulties } as const
-const radii = { weight: 72, resources: 126, difficulties: 178, focus: 220 }
+const radii = { weight: 72, resources: 132, difficulties: 196 }
 const center = 250
 
 const cellIds = {
@@ -23,9 +22,10 @@ function polar(radius: number, angle: number) {
 
 function ResonanceCell({ ring, id, cellId, sector, angle, radius, emoji, active, focus = false }: { ring: string; id: string; cellId: string; sector: number; angle: number; radius: number; emoji: string; active: boolean; focus?: boolean }) {
   const point = polar(radius, angle)
-  return <g className={`resonance-cell ${ring} ${active ? 'active' : 'empty'} ${focus ? 'focus' : ''}`} data-ring={ring} data-sector={sector} data-cell-id={cellId} data-id={id} data-active={active ? 'true' : 'false'} transform={`translate(${point.x} ${point.y})`}>
-    <circle className="cell-bubble" r={active ? (focus ? 30 : 24) : 6} />
-    <text textAnchor="middle" dominantBaseline="central" fontSize={active ? (focus ? 26 : 32) : 13}>{active ? (focus ? `⭐${emoji}` : emoji) : '○'}</text>
+  return <g className={`resonance-cell ${ring} ${active ? 'active' : 'empty'} ${focus ? 'focus' : ''}`} data-ring={ring} data-sector={sector} data-cell-id={cellId} data-id={id} data-active={active ? 'true' : 'false'} data-focus={focus ? 'true' : 'false'} transform={`translate(${point.x} ${point.y})`}>
+    {focus && <circle className="focus-halo" r="35" />}
+    <circle className="cell-bubble" r={active ? 24 : 3} />
+    {active && <text textAnchor="middle" dominantBaseline="central" fontSize={focus ? 36 : 32}>{emoji}</text>}
   </g>
 }
 
@@ -37,19 +37,15 @@ export function EchoMoodRosace({ echoMood, variant = 'single', showLegend = fals
         <radialGradient id="mandalaBg"><stop offset="0" stopColor="#fff9df" stopOpacity=".24"/><stop offset=".52" stopColor="#73d8ff" stopOpacity=".08"/><stop offset="1" stopColor="#ffffff" stopOpacity=".02"/></radialGradient>
       </defs>
       <circle className="mandala-bg" cx={center} cy={center} r="238" fill="url(#mandalaBg)" />
-      {[radii.weight, radii.resources, radii.difficulties, radii.focus].map((radius) => <circle key={radius} className="mandala-ring" cx={center} cy={center} r={radius} />)}
+      {[radii.weight, radii.resources, radii.difficulties].map((radius) => <circle key={radius} className="mandala-ring" cx={center} cy={center} r={radius} />)}
       {Object.entries(weights).map(([id, angle], index) => <ResonanceCell key={id} ring="weight" id={id} cellId={cellIds.weight[id as WeightCode]} sector={index + 1} angle={angle} radius={radii.weight} emoji={weightDictionary[id as WeightCode].emoji} active={echoMood.weight === id} />)}
-      {Object.entries(resources).map(([id, angle], index) => <ResonanceCell key={id} ring="resources" id={id} cellId={cellIds.resources[id as ResourceCode]} sector={index + 1} angle={angle} radius={radii.resources} emoji={resourceDictionary[id as ResourceCode].emoji} active={echoMood.selectedResources.includes(id as ResourceCode)} />)}
-      {Object.entries(difficulties).map(([id, angle], index) => <ResonanceCell key={id} ring="difficulties" id={id} cellId={cellIds.difficulties[id as DifficultyCode]} sector={index + 1} angle={angle} radius={radii.difficulties} emoji={difficultyDictionary[id as DifficultyCode].emoji} active={echoMood.selectedDifficulties.includes(id as DifficultyCode)} />)}
-      {Object.entries(focusAngles).map(([id, angle], index) => {
-        const emoji = id.startsWith('r') ? resourceDictionary[id as ResourceCode].emoji : difficultyDictionary[id as DifficultyCode].emoji
-        return <ResonanceCell key={`focus-${id}`} ring="focus" id={id} cellId={`F${String(index + 1).padStart(2, '0')}`} sector={index + 1} angle={angle} radius={radii.focus} emoji={emoji} active={daily === id} focus />
-      })}
+      {Object.entries(resources).map(([id, angle], index) => <ResonanceCell key={id} ring="resources" id={id} cellId={cellIds.resources[id as ResourceCode]} sector={index + 1} angle={angle} radius={radii.resources} emoji={resourceDictionary[id as ResourceCode].emoji} active={echoMood.selectedResources.includes(id as ResourceCode)} focus={daily === id} />)}
+      {Object.entries(difficulties).map(([id, angle], index) => <ResonanceCell key={id} ring="difficulties" id={id} cellId={cellIds.difficulties[id as DifficultyCode]} sector={index + 1} angle={angle} radius={radii.difficulties} emoji={difficultyDictionary[id as DifficultyCode].emoji} active={echoMood.selectedDifficulties.includes(id as DifficultyCode)} focus={daily === id} />)}
       <g className="mandala-center" data-ring="center" data-sector="0" data-cell-id={weatherCells[echoMood.weather]} data-id={echoMood.weather} data-active="true">
         <circle cx={center} cy={center} r="46" />
         <text x={center} y={center} textAnchor="middle" dominantBaseline="central" fontSize="58">{weatherDictionary[echoMood.weather].emoji}</text>
       </g>
     </svg>
-    {showLegend && <p className="rosace-legend">Centre météo · anneaux concentriques traitement, ressources, difficultés et focus. Les bulles vides restent des repères de lecture.</p>}
+    {showLegend && <p className="rosace-legend">Centre météo · anneaux concentriques traitement, ressources et difficultés. Les points vides restent des repères de lecture.</p>}
   </div>
 }
