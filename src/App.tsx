@@ -2,12 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import { toPng } from 'html-to-image'
 import { CardButton } from './components/CardButton'
-import { Constellation } from './components/Constellation'
+import { EchoMoodRosace } from './components/EchoMoodRosace'
+import { EchoMoodTimelineRosace } from './components/EchoMoodTimelineRosace'
 import { Progress } from './components/Progress'
 import { cards, treatmentOptions, weatherOptions } from './data/echomood'
 import { loadHistory, upsertEntry } from './lib/history'
-import { createSummary } from './lib/synthesis'
+import { createSummary, toCompactEchoMood } from './lib/synthesis'
 import { createHistoryXml } from './lib/xmlExport'
+import { encodeEchoMood } from './lib/echoMoodCodec'
 import type { EchoMoodEntry, Perspective, TreatmentOption, WeatherOption } from './types/domain'
 import './styles/app.css'
 
@@ -75,6 +77,13 @@ function App() {
     setSavedEntry(entry)
     setHistory(upsertEntry(entry))
     goTo(5)
+  }
+
+  function copyEchoMoodCode() {
+    if (!summary) return
+    const compact = summary.echoMood ?? toCompactEchoMood(summary)
+    navigator.clipboard.writeText(encodeEchoMood(compact))
+    notify('Code EchoMood copié')
   }
 
   function shareSynthesisByEmail() {
@@ -177,10 +186,10 @@ function App() {
 
       {screen === 5 && summary && (
         <section className="screen">
-          <SummaryCard refEl={resultRef} entry={summary} selectedCards={selectedCards} priorityCards={priorityCards} />
+          <SummaryCard refEl={resultRef} entry={summary} />
           <ShareView reportRef={reportRef} entries={history} patient={latestPatient} parent={latestParent} />
           <div className="result-actions">
-            <button className="btn btn-secondary" type="button" onClick={shareSynthesisByEmail}>✉️ Partager cette synthèse pour mon orthodontiste</button>
+            <button className="btn btn-secondary" type="button" onClick={copyEchoMoodCode}>📋 Copier</button><button className="btn btn-secondary" type="button" onClick={() => downloadPng(resultRef.current, 'echomood-rosace.png')}>🖼️ Télécharger image/PDF</button><button className="btn btn-secondary" type="button" onClick={shareSynthesisByEmail}>✉️ Partager cette synthèse pour mon orthodontiste</button>
             <button className="btn btn-secondary" type="button" onClick={printPdfReport}>🖨️ Imprimer cette synthèse pour mon orthodontiste</button>
             <button className="btn btn-secondary" type="button" onClick={() => goTo(6)}>📈 Voir l’évolution</button>
             {summary.perspective === 'patient' && (
@@ -216,9 +225,10 @@ function Home({ onStart, onHistory }: { onStart: () => void; onHistory: () => vo
 
 function EffervescentBubbles({ variant }: { variant: 'ambient' | 'hero' | 'reveal' }) { return <div className={`bubble-field bubble-field-${variant}`} aria-hidden="true">{Array.from({ length: 12 }, (_, index) => <span key={index} className={`bubble bubble-${index + 1}`} />)}</div> }
 function CardGroup({ title, group, mode, selectedIds, onToggle }: { title: string; group: 'resource' | 'difficulty'; mode: Perspective; selectedIds: string[]; onToggle: (id: string) => void }) { return <section className="card-group"><h3 className="card-group-title">{title}</h3><div className="card-grid">{cards.filter((card) => card.group === group).map((card) => <CardButton key={card.id} card={{ ...card, label: mode === 'parent' ? card.parentLabel : card.label }} selected={selectedIds.includes(card.id)} onClick={() => onToggle(card.id)} />)}</div></section> }
-function SummaryCard({ refEl, entry, selectedCards, priorityCards }: { refEl: RefObject<HTMLDivElement | null>; entry: EchoMoodEntry; selectedCards: typeof cards; priorityCards: typeof cards }) {
+function SummaryCard({ refEl, entry }: { refEl: RefObject<HTMLDivElement | null>; entry: EchoMoodEntry }) {
   const isParent = entry.perspective === 'parent'
-  return <div ref={refEl} className="result-capture result-reveal"><EffervescentBubbles variant="reveal" /><span className="mode-pill">{isParent ? 'Mode Parent' : 'Mode Jeune'}</span><h2 className="result-title">{isParent ? 'Voici l’EchoMood Parent' : 'Voici ton EchoMood aujourd’hui'}</h2><p className="result-date">{new Date(entry.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}</p><ResultSection title={isParent ? '🌦️ Météo perçue' : '🌦️ Météo'} cards={[{ ...entry.weather, parentLabel: entry.weather.label, group: 'resource' }]} /><ResultSection title={isParent ? '🎈 Place du traitement perçue' : '🎈 Place du traitement'} cards={entry.treatmentWeight ? [{ ...entry.treatmentWeight, parentLabel: entry.treatmentWeight.label, group: 'resource' }] : []} /><ResultSection title={isParent ? '⭐ Carte du jour perçue' : '⭐ Carte du jour'} cards={priorityCards} priority /><ResultSection title={isParent ? '🌟 Ce qui semble le soutenir' : '🌟 Ce qui me soutient'} cards={selectedCards.filter((card) => card.group === 'resource')} /><ResultSection title={isParent ? '🌧️ Ce qui semble lui peser' : '🌧️ Ce qui me pèse'} cards={selectedCards.filter((card) => card.group === 'difficulty')} /><article className="result-section constellation-card"><h3>{isParent ? '🌌 Paysage EchoMood Parent' : '🌌 Paysage EchoMood'}</h3><div className="constellation-wrap"><Constellation selected={selectedCards} priorities={priorityCards} weather={entry.weather} /></div></article><article className="result-section synthesis-box"><h3>📝 Synthèse pour le praticien</h3><p>{entry.synthesis}</p></article><article className="result-section question-box"><h3>💬 Pour en parler</h3><p>{entry.suggestedQuestion}</p></article></div>
+  const compact = entry.echoMood ?? toCompactEchoMood(entry)
+  return <div ref={refEl} className="result-capture resonance-summary"><span className="mode-pill">{isParent ? 'Mode Parent' : 'Mode Jeune'}</span><h2 className="result-title">{isParent ? 'Voici l’EchoMood Parent' : 'Voici ton EchoMood aujourd’hui'}</h2><p className="result-date">{new Date(entry.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}</p><article className="result-section rosace-main-card"><EchoMoodRosace echoMood={compact} variant="single" showLegend animated={false} /></article><article className="result-section synthesis-box"><h3>📝 Synthèse narrative</h3><p>{entry.synthesis}</p></article><article className="result-section question-box"><h3>💬 Question d’ouverture</h3><p>{entry.suggestedQuestion}</p></article></div>
 }
 
 function Comparison({ patient, parent }: { patient?: EchoMoodEntry; parent?: EchoMoodEntry }) {
@@ -229,7 +239,7 @@ function Comparison({ patient, parent }: { patient?: EchoMoodEntry; parent?: Ech
   return <div className="comparison"><h3>Regards croisés</h3>{!patient || !parent ? <p className="empty-history">Complétez un EchoMood Jeune et un EchoMood Parent pour repérer les écarts de perception.</p> : <><div className="comparison-columns"><article><h4>🧒 EchoMood Jeune</h4><p>{patient.weather.emoji} {patient.weather.label}</p><p>{patient.treatmentWeight ? `${patient.treatmentWeight.emoji} ${patient.treatmentWeight.label}` : '—'}</p><p>{patient.priorities[0] ? `${patient.priorities[0].emoji} ${patient.priorities[0].label}` : '—'}</p></article><article><h4>👨‍👩‍👧 EchoMood Parent</h4><p>{parent.weather.emoji} {parent.weather.label}</p><p>{parent.treatmentWeight ? `${parent.treatmentWeight.emoji} ${parent.treatmentWeight.label}` : '—'}</p><p>{parent.priorities[0] ? `${parent.priorities[0].emoji} ${parent.priorities[0].label}` : '—'}</p></article></div><ResultSection title="✅ Ce qui se rejoint" cards={shared} priority /><ResultSection title="👀 Ce qui semble perçu différemment" cards={different} /><p className="comparison-note">Les deux EchoMood permettent de repérer ce qui est partagé et ce qui mérite d’être exploré ensemble pendant la consultation.</p></>}</div>
 }
 
-function HistoryDashboard({ refEl, entries, patient, parent }: { refEl: RefObject<HTMLDivElement | null>; entries: EchoMoodEntry[]; patient?: EchoMoodEntry; parent?: EchoMoodEntry }) { const maxScore = Math.max(...entries.map((entry) => entry.weatherScore), 1); return <div ref={refEl} className="result-capture history-capture"><p className="history-kicker">Dashboard local jeune + parent</p><h2 className="result-title">Synthèse & évolution</h2><Comparison patient={patient} parent={parent} />{entries.length === 0 ? <p className="empty-history">Aucune synthèse enregistrée pour le moment.</p> : <><div className="stats-grid"><div><strong>{entries.length}</strong><span>mesures</span></div><div><strong>{entries.filter((e) => e.perspective === 'patient').length}</strong><span>patient</span></div><div><strong>{entries.filter((e) => e.perspective === 'parent').length}</strong><span>parent</span></div><div><strong>{patient && parent ? Math.abs(patient.weatherScore - parent.weatherScore) : '—'}</strong><span>écart météo</span></div></div><div className="timeline-chart" aria-label="Évolution de la météo EchoMood">{entries.map((entry) => <div className={`chart-item ${entry.perspective}`} key={entry.id}><span className="chart-bar" style={{ height: `${Math.max(18, (entry.weatherScore / maxScore) * 120)}px` }}><span>{entry.weather.emoji}</span></span><small>{modeLabel[entry.perspective]}</small><small>{new Date(entry.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</small></div>)}</div><div className="history-list">{entries.slice().reverse().map((entry) => <article key={entry.id} className="history-entry"><div><strong>{entry.weather.emoji} {modeLabel[entry.perspective]} · {entry.weather.label}</strong><small>{new Date(entry.createdAt).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</small></div><p>{entry.priorities.map((card) => `${card.emoji} ${card.label}`).join(' • ')}</p></article>)}</div></>}</div> }
+function HistoryDashboard({ refEl, entries, patient, parent }: { refEl: RefObject<HTMLDivElement | null>; entries: EchoMoodEntry[]; patient?: EchoMoodEntry; parent?: EchoMoodEntry }) { return <div ref={refEl} className="result-capture history-capture"><p className="history-kicker">Dashboard local jeune + parent</p><h2 className="result-title">Synthèse & évolution</h2><Comparison patient={patient} parent={parent} /><EchoMoodTimelineRosace history={entries.map((entry) => entry.echoMood ?? toCompactEchoMood(entry))} />{entries.length === 0 ? <p className="empty-history">Aucune synthèse enregistrée pour le moment.</p> : <><div className="stats-grid"><div><strong>{entries.length}</strong><span>mesures</span></div><div><strong>{entries.filter((e) => e.perspective === 'patient').length}</strong><span>patient</span></div><div><strong>{entries.filter((e) => e.perspective === 'parent').length}</strong><span>parent</span></div><div><strong>{patient && parent ? Math.abs(patient.weatherScore - parent.weatherScore) : '—'}</strong><span>écart météo</span></div></div><div className="history-mandala-grid" aria-label="Historique EchoMood en mandalas">{entries.slice().reverse().map((entry) => <article key={entry.id} className="history-mandala-card"><EchoMoodRosace echoMood={entry.echoMood ?? toCompactEchoMood(entry)} variant="single" animated={false} /><small>{modeLabel[entry.perspective]} · {new Date(entry.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</small></article>)}</div></>}</div> }
 
 function ShareView({ reportRef, entries, patient, parent }: { reportRef: RefObject<HTMLDivElement | null>; entries: EchoMoodEntry[]; patient?: EchoMoodEntry; parent?: EchoMoodEntry }) { return <div ref={reportRef} className="result-capture report-capture"><p className="history-kicker">Rapport PDF horodaté</p><h2 className="result-title">Rapport EchoMood Ortho</h2><p className="result-date">Généré le {new Date().toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })}</p><Comparison patient={patient} parent={parent} />{[patient, parent].filter(Boolean).map((entry) => <article className="report-panel" key={entry!.id}><h3>{modeLabel[entry!.perspective]} · {entry!.weather.emoji} {entry!.weather.label}</h3><p>{entry!.synthesis}</p>{entry!.tip && <p className="tip-report"><strong>{entry!.tip.title}.</strong> {entry!.tip.text}</p>}<ResultSection title="Carte du jour" cards={entry!.priorities} priority /></article>)}<p className="report-footnote">Historique inclus : {entries.length} mesure(s) enregistrée(s) localement sur cet appareil.</p></div> }
 

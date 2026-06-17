@@ -1,6 +1,30 @@
-import { questions } from '../data/echomood'
-import { getWeatherScore } from './history'
-import type { EchoMoodSummary, MoodCard, Perspective, TreatmentOption, WeatherOption } from '../types/domain'
+import { cards, questions, treatmentOptions, weatherOptions } from '../data/echomood'
+import type { DifficultyCode, ResourceCode, WeatherCode, WeightCode } from './echoMoodCodec'
+import type { EchoMood, EchoMoodSummary, MoodCard, Perspective, TreatmentOption, WeatherOption } from '../types/domain'
+
+const legacyWeatherScores = Object.fromEntries(weatherOptions.map((option, index) => [option.id, weatherOptions.length - index])) as Record<string, number>
+const getLegacyWeatherScore = (weatherId: string) => legacyWeatherScores[weatherId] ?? 0
+
+const weatherCodeByLegacyId: Record<string, WeatherCode> = { soleil: 'sun', eclaircies: 'clear', variable: 'variable', couvert: 'cloudy', pluie: 'rain', orage: 'storm' }
+const weightCodeByLegacyId: Record<string, WeightCode> = { ballon: 'balloon', sac: 'bag', valise: 'suitcase', rocher: 'rock' }
+const cardCodeByLegacyId: Record<string, ResourceCode | DifficultyCode> = {
+  changements: 'r1', perseverance: 'r2', sens: 'r3', projection: 'r4', soutien: 'r5', fierte: 'r6', habitudes: 'r7', comprehension: 'r8',
+  elastiques: 'd1', douleur: 'd2', irritations: 'd3', duree: 'd4', oubli: 'd5', regard: 'd6', manger: 'd7', questions: 'd8',
+}
+
+export function toCompactEchoMood(summary: EchoMoodSummary): EchoMood {
+  const selectedCodes = summary.selected.map((card) => cardCodeByLegacyId[card.id]).filter(Boolean)
+  return {
+    id: summary.id.startsWith('emo_') ? summary.id : `emo_${summary.date.replaceAll('-', '')}_${summary.id.slice(0, 8)}`,
+    mode: summary.perspective,
+    date: summary.date,
+    weather: weatherCodeByLegacyId[summary.weather.id] ?? 'variable',
+    weight: weightCodeByLegacyId[summary.treatmentWeight?.id ?? ''] ?? 'bag',
+    selectedResources: selectedCodes.filter((id) => id.startsWith('r')) as ResourceCode[],
+    selectedDifficulties: selectedCodes.filter((id) => id.startsWith('d')) as DifficultyCode[],
+    dailyCard: cardCodeByLegacyId[summary.priorities[0]?.id] ?? (selectedCodes[0] as ResourceCode | DifficultyCode) ?? 'r1',
+  }
+}
 
 function treatmentInterpretation(treatmentWeight: TreatmentOption | null) {
   switch (treatmentWeight?.id) {
@@ -30,12 +54,12 @@ export function createSummary(selected: MoodCard[], priorities: MoodCard[], weat
   const dailyCard = priorities[0]
   const createdAt = new Date().toISOString()
 
-  return {
+  const summary: EchoMoodSummary = {
     id: crypto.randomUUID(),
     createdAt,
     date: createdAt.slice(0, 10),
     perspective,
-    weatherScore: getWeatherScore(weather.id),
+    weatherScore: getLegacyWeatherScore(weather.id),
     impactScore,
     treatmentWeight,
     weather,
@@ -44,5 +68,34 @@ export function createSummary(selected: MoodCard[], priorities: MoodCard[], weat
     synthesis: buildSynthesis(weather, treatmentWeight, dailyCard, perspective),
     tip: null,
     suggestedQuestion: getOpeningQuestion(dailyCard, perspective),
+  }
+  summary.echoMood = toCompactEchoMood(summary)
+  return summary
+}
+
+export function fromCompactEchoMood(echoMood: EchoMood): EchoMoodSummary {
+  const weatherLegacyIdByCode: Record<WeatherCode, string> = { sun: 'soleil', clear: 'eclaircies', variable: 'variable', cloudy: 'couvert', rain: 'pluie', storm: 'orage' }
+  const weightLegacyIdByCode: Record<WeightCode, string> = { balloon: 'ballon', bag: 'sac', suitcase: 'valise', rock: 'rocher' }
+  const legacyByCode = Object.fromEntries(Object.entries(cardCodeByLegacyId).map(([legacy, code]) => [code, legacy]))
+  const selectedIds = [...echoMood.selectedResources, ...echoMood.selectedDifficulties].map((code) => legacyByCode[code])
+  const selected = cards.filter((card) => selectedIds.includes(card.id))
+  const priorities = cards.filter((card) => card.id === legacyByCode[echoMood.dailyCard])
+  const weather = weatherOptions.find((option) => option.id === weatherLegacyIdByCode[echoMood.weather]) ?? weatherOptions[2]
+  const treatmentWeight = treatmentOptions.find((option) => option.id === weightLegacyIdByCode[echoMood.weight]) ?? null
+  return {
+    id: echoMood.id,
+    createdAt: `${echoMood.date}T12:00:00.000Z`,
+    date: echoMood.date,
+    perspective: echoMood.mode,
+    weatherScore: getLegacyWeatherScore(weather.id),
+    impactScore: null,
+    treatmentWeight,
+    weather,
+    selected,
+    priorities,
+    synthesis: buildSynthesis(weather, treatmentWeight, priorities[0], echoMood.mode),
+    suggestedQuestion: getOpeningQuestion(priorities[0], echoMood.mode),
+    echoMood,
+    tip: null,
   }
 }
