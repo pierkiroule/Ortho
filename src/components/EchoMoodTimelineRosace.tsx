@@ -47,7 +47,7 @@ export function EchoMoodTimelineRosace({ history }: { history: EchoMood[] }) {
   const displayed = periodMode ? summary!.echoMood : current
   return <section className="timeline-rosace-panel">
     <div className="timeline-toolbar"><button className="btn btn-secondary" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? '⏸️ Pause' : '▶️ Play'}</button><button className="btn btn-secondary" type="button" onClick={() => setPeriodMode((value) => !value)}>{periodMode ? 'Voir par date' : 'Synthèse période'}</button></div>
-    <EchoMoodRosace echoMood={displayed} variant={periodMode ? 'summary' : 'single'} showLegend animated frequencies={summary?.frequencies} recentIds={periodMode ? summary?.recentIds : []} />
+    <EchoMoodRosace echoMood={displayed} variant={periodMode ? 'summary' : 'single'} showLegend animated={false} frequencies={summary?.frequencies} recentIds={periodMode ? summary?.recentIds : []} />
     {!periodMode && <><input className="timeline-slider" type="range" min="0" max={history.length - 1} value={index} onChange={(event) => setIndex(Number(event.target.value))} /><p className="result-date">{new Date(current.date).toLocaleDateString('fr-FR', { dateStyle: 'full' })} · {weatherDictionary[current.weather].emoji} {weightDictionary[current.weight].emoji}</p></>}
     {periodMode && <p className="period-sentence">Sur cette période, les éléments les plus présents sont : {summary!.top3.join(', ') || 'aucun élément récurrent'}.</p>}
   </section>
