@@ -53,7 +53,21 @@ export type EchoMoodSummary = {
   priorities: MoodCard[]
   synthesis: string
   suggestedQuestion: string
+  echoMood?: EchoMood
   tip: EducationalTip | null
 }
 
 export type EchoMoodEntry = EchoMoodSummary
+
+export type EchoMoodMode = 'patient' | 'parent'
+
+export type EchoMood = {
+  id: string
+  mode: EchoMoodMode
+  date: string
+  weather: import('../lib/echoMoodCodec').WeatherCode
+  weight: import('../lib/echoMoodCodec').WeightCode
+  selectedResources: import('../lib/echoMoodCodec').ResourceCode[]
+  selectedDifficulties: import('../lib/echoMoodCodec').DifficultyCode[]
+  dailyCard: import('../lib/echoMoodCodec').ResourceCode | import('../lib/echoMoodCodec').DifficultyCode
+}
